@@ -1,0 +1,9 @@
+langchain
+langchain-google-genai
+langchain-community
+chromadb
+pymupdf
+streamlit
+python-dotenv
+requests
+rich

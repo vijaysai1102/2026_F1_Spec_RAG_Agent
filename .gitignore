@@ -1,0 +1,9 @@
+.env
+vector_db/
+data/*.pdf
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+list_models.py
+check_api.py
+check_imports.py
