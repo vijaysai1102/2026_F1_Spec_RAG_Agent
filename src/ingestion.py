@@ -1,5 +1,4 @@
 import os
-import requests
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -9,21 +8,8 @@ from langchain_chroma import Chroma
 load_dotenv()
 
 # Configuration
-PDF_URL = "https://www.fia.com/sites/default/files/fia_2026_f1_regulations_-_section_c_technical_-_iss_16_-_2026-02-27.pdf"
-DATA_DIR = "data"
-PDF_PATH = os.path.join(DATA_DIR, "2026_f1_technical_regulations.pdf")
+PDF_PATH = os.path.join("data", "2026_f1_technical_regulations.pdf")
 VECTOR_DB_DIR = "vector_db"
-
-def download_pdf():
-    os.makedirs(DATA_DIR, exist_ok=True)
-    if not os.path.exists(PDF_PATH):
-        print(f"Downloading PDF from {PDF_URL}...")
-        response = requests.get(PDF_URL)
-        with open(PDF_PATH, "wb") as f:
-            f.write(response.content)
-        print("Download complete.")
-    else:
-        print("PDF already exists.")
 
 def ingest_data():
     if not os.path.exists(PDF_PATH):
@@ -60,5 +46,4 @@ if __name__ == "__main__":
     if not os.getenv("GOOGLE_API_KEY"):
         print("Error: GOOGLE_API_KEY not found in environment. Please set it in .env file.")
     else:
-        download_pdf()
         ingest_data()
