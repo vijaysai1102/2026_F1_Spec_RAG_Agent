@@ -1,9 +1,12 @@
 .env
 vector_db/
-data/*.pdf
+data/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 list_models.py
 check_api.py
 check_imports.py
+test_gemini.py
+list_models_api.py
+test_imports.py

@@ -1,6 +1,11 @@
 langchain
 langchain-google-genai
 langchain-community
+langchain-huggingface
+langchain-chroma
+langchain-text-splitters
+sentence-transformers
+google-generativeai
 chromadb
 pymupdf
 streamlit

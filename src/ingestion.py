@@ -15,6 +15,7 @@ PDF_PATH = os.path.join(DATA_DIR, "2026_f1_technical_regulations.pdf")
 VECTOR_DB_DIR = "vector_db"
 
 def download_pdf():
+    os.makedirs(DATA_DIR, exist_ok=True)
     if not os.path.exists(PDF_PATH):
         print(f"Downloading PDF from {PDF_URL}...")
         response = requests.get(PDF_URL)
@@ -59,4 +60,5 @@ if __name__ == "__main__":
     if not os.getenv("GOOGLE_API_KEY"):
         print("Error: GOOGLE_API_KEY not found in environment. Please set it in .env file.")
     else:
+        download_pdf()
         ingest_data()
