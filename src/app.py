@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 # Add src to sys.path
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from rag_agent import F1RAGAgent
+from ingestion import ingest_data
 
 load_dotenv()
 
@@ -21,7 +22,14 @@ The agent will answer based on the official PDF and provide **Article Number** c
 @st.cache_resource
 def load_rag_agent():
     if not os.path.exists("vector_db"):
-        return None
+        with st.spinner("Initializing vector database from regulations... This may take a minute."):
+            try:
+                ingest_data()
+                st.success("Database initialized!")
+            except Exception as e:
+                st.error(f"Failed to initialize database: {e}")
+                return None
+    
     try:
         return F1RAGAgent()
     except Exception as e:
