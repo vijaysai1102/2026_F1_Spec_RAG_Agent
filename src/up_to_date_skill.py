@@ -58,7 +58,9 @@ class UpToDateAnswerSkill:
     WIKIPEDIA_OPENSEARCH_ENDPOINT = (
         "https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit={limit}&namespace=0&format=json"
     )
+    WIKIPEDIA_SEARCH_ENDPOINT = "https://en.wikipedia.org/w/api.php"
     REQUEST_TIMEOUT_SECONDS = 8
+    REQUEST_HEADERS = {"User-Agent": "F1RAGAgent/1.0"}
 
     def should_activate(self, question: str) -> bool:
         lowered = question.lower()
@@ -72,7 +74,11 @@ class UpToDateAnswerSkill:
         query = quote_plus(f"Formula 1 {question}")
         endpoint = self.DUCKDUCKGO_ENDPOINT.format(query=query)
         try:
-            response = requests.get(endpoint, timeout=self.REQUEST_TIMEOUT_SECONDS)
+            response = requests.get(
+                endpoint,
+                timeout=self.REQUEST_TIMEOUT_SECONDS,
+                headers=self.REQUEST_HEADERS,
+            )
             response.raise_for_status()
         except requests.RequestException as exc:
             return SkillResult(
@@ -86,6 +92,8 @@ class UpToDateAnswerSkill:
         sources = self._extract_sources(payload, max_results=max_results)
         if not sources:
             sources = self._search_wikipedia(question, max_results=max_results)
+        if not sources:
+            sources = self._search_wikipedia_query(question, max_results=max_results)
         return SkillResult(active=True, generated_at_utc=generated_at_utc, sources=sources)
 
     def _extract_sources(self, payload: dict, max_results: int) -> List[WebSource]:
@@ -137,7 +145,11 @@ class UpToDateAnswerSkill:
         query = quote_plus(f"Formula 1 {question}")
         endpoint = self.WIKIPEDIA_OPENSEARCH_ENDPOINT.format(query=query, limit=max_results)
         try:
-            response = requests.get(endpoint, timeout=self.REQUEST_TIMEOUT_SECONDS)
+            response = requests.get(
+                endpoint,
+                timeout=self.REQUEST_TIMEOUT_SECONDS,
+                headers=self.REQUEST_HEADERS,
+            )
             response.raise_for_status()
         except requests.RequestException:
             return []
@@ -156,6 +168,46 @@ class UpToDateAnswerSkill:
                 continue
             snippet = description or "Wikipedia summary result."
             sources.append(WebSource(title=str(title), url=str(url), snippet=str(snippet)))
+            if len(sources) >= max_results:
+                break
+        return sources
+
+    def _search_wikipedia_query(self, question: str, max_results: int) -> List[WebSource]:
+        query = f"Formula 1 {question}"
+        params = {
+            "action": "query",
+            "list": "search",
+            "srsearch": query,
+            "srlimit": max_results,
+            "format": "json",
+        }
+        try:
+            response = requests.get(
+                self.WIKIPEDIA_SEARCH_ENDPOINT,
+                params=params,
+                timeout=self.REQUEST_TIMEOUT_SECONDS,
+                headers=self.REQUEST_HEADERS,
+            )
+            response.raise_for_status()
+        except requests.RequestException:
+            return []
+
+        payload = response.json()
+        query_payload = payload.get("query", {}) if isinstance(payload, dict) else {}
+        search_results = query_payload.get("search", []) if isinstance(query_payload, dict) else []
+
+        sources: List[WebSource] = []
+        for result in search_results:
+            if not isinstance(result, dict):
+                continue
+            title = result.get("title")
+            page_id = result.get("pageid")
+            if not title or not page_id:
+                continue
+            snippet_raw = str(result.get("snippet") or "Wikipedia search result.")
+            snippet = snippet_raw.replace("<span class=\"searchmatch\">", "").replace("</span>", "")
+            url = f"https://en.wikipedia.org/?curid={page_id}"
+            sources.append(WebSource(title=str(title), url=url, snippet=snippet))
             if len(sources) >= max_results:
                 break
         return sources
