@@ -6,6 +6,7 @@ A Retrieval-Augmented Generation (RAG) agent specialized in the **2026 FIA Formu
 *   **Official Data Source:** Queries the latest 2026 FIA Technical Regulations.
 *   **Exact Citations:** Every technical answer includes the corresponding Article Number (e.g., Article 3.2.1).
 *   **Up-to-Date Answer Skill:** Detects "latest/current/update" style questions and injects live web snippets with URL citations.
+*   **Robust Live Source Fallbacks:** Uses DuckDuckGo Instant Answer, then Wikipedia OpenSearch, then Wikipedia Query API for better source recall in deployed environments.
 *   **Dual Interface:** Includes both a **Terminal CLI** and a **Streamlit Web UI**.
 *   **Powered by Gemini:** Uses Google Gemini models for high-quality technical reasoning.
 
@@ -22,7 +23,7 @@ A Retrieval-Augmented Generation (RAG) agent specialized in the **2026 FIA Formu
     GOOGLE_API_KEY=your_gemini_api_key_here
     ```
 4.  **Ingest Regulations:**
-    Run the ingestion script to download the PDF and build the vector database:
+    Run the ingestion script to process the local PDF and build the vector database:
     ```bash
     python src/ingestion.py
     ```
@@ -40,6 +41,12 @@ Launch the browser-based interface:
 ```bash
 streamlit run src/app.py
 ```
+
+## 🌐 Up-to-Date Skill Behavior
+
+- Triggers for time-sensitive prompts (for example: "latest", "current", "recent", "as of now", "update").
+- Returns live source links in UI/CLI when available.
+- If no live snippets are available, the app explicitly reports that state instead of fabricating live evidence.
 
 ## 📁 Project Structure
 *   `src/ingestion.py`: Downloads PDF and populates the ChromaDB vector store.
