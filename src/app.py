@@ -46,7 +46,11 @@ else:
         st.header("About")
         st.info("This agent uses a RAG pipeline with Google Gemini to query the 2026 FIA Technical Regulations.")
         st.subheader("Key Features")
-        st.markdown("- **Direct PDF Querying**\n- **Mandatory Citations**\n- **Zero Hallucination Focus**")
+        st.markdown(
+            "- **Direct PDF Querying**\n"
+            "- **Mandatory Citations**\n"
+            "- **Live Web Skill for Up-to-Date Questions**"
+        )
         if st.button("Clear Chat"):
             st.session_state.messages = []
             st.rerun()
@@ -66,7 +70,7 @@ else:
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("Analyzing regulations..."):
+            with st.spinner("Analyzing regulations and checking live updates when needed..."):
                 try:
                     response = agent.query(prompt)
                     answer = response["answer"]
@@ -84,5 +88,20 @@ else:
                             st.write(f"**Source {i+1} (Page {page_num})**")
                             st.write(doc.page_content)
                             st.divider()
+
+                    if response.get("skill_active"):
+                        with st.expander("🌐 Live Web Sources (Up-to-Date Skill)"):
+                            if response.get("skill_error"):
+                                st.warning(response["skill_error"])
+                            elif not response.get("web_sources"):
+                                st.info("No live web snippets were returned for this question.")
+                            else:
+                                for i, source in enumerate(response["web_sources"], start=1):
+                                    st.markdown(
+                                        f"**{i}. {source['title']}**  \n"
+                                        f"{source['url']}  \n"
+                                        f"{source['snippet']}"
+                                    )
+                                    st.divider()
                 except Exception as e:
                     st.error(f"Error generating answer: {e}")

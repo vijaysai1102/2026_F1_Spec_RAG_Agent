@@ -5,6 +5,7 @@ A Retrieval-Augmented Generation (RAG) agent specialized in the **2026 FIA Formu
 ## 🚀 Features
 *   **Official Data Source:** Queries the latest 2026 FIA Technical Regulations.
 *   **Exact Citations:** Every technical answer includes the corresponding Article Number (e.g., Article 3.2.1).
+*   **Up-to-Date Answer Skill:** Detects "latest/current/update" style questions and injects live web snippets with URL citations.
 *   **Dual Interface:** Includes both a **Terminal CLI** and a **Streamlit Web UI**.
 *   **Powered by Gemini:** Uses Google Gemini models for high-quality technical reasoning.
 
@@ -43,6 +44,7 @@ streamlit run src/app.py
 ## 📁 Project Structure
 *   `src/ingestion.py`: Downloads PDF and populates the ChromaDB vector store.
 *   `src/rag_agent.py`: Core RAG pipeline with strict citation prompting.
+*   `src/up_to_date_skill.py`: Live web enrichment skill for current-event and latest-update questions.
 *   `src/cli.py`: Interactive command-line interface.
 *   `src/app.py`: Streamlit-based web dashboard.
 *   `vector_db/`: Persistent storage for regulatory document embeddings.

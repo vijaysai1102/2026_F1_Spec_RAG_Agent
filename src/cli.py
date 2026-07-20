@@ -58,6 +58,19 @@ def run_cli():
                 console.print(f"[italic]{doc.page_content[:300]}...[/italic]")
                 console.print("-" * 20)
 
+            if response.get("skill_active"):
+                console.print("\n", Rule(title="[bold magenta]Live Web Sources[/bold magenta]", style="magenta"))
+                if response.get("skill_error"):
+                    console.print(f"[yellow]{response['skill_error']}[/yellow]")
+                elif not response.get("web_sources"):
+                    console.print("[yellow]No live web snippets were returned for this question.[/yellow]")
+                else:
+                    for i, source in enumerate(response["web_sources"], start=1):
+                        console.print(f"[bold magenta]{i}. {source['title']}[/bold magenta]")
+                        console.print(source["url"])
+                        console.print(f"[italic]{source['snippet']}[/italic]")
+                        console.print("-" * 20)
+
         except KeyboardInterrupt:
             console.print("\n[green]Goodbye![/green]")
             break
